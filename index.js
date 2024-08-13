@@ -11,7 +11,14 @@ const client = await createClient()
 app.use(express.static("public"));
 
 // TODO: initialize values for: header, left, right, article and footer using the redis client
-
+await client.set('key', 'value',{
+  header: 0,
+  left: 0,
+  article: 0,
+  article: 0,
+  right: 0,
+  footer: 0
+})
 // Get values for holy grail layout
 function data() {
   // TODO: uses Promise to get the values for header, left, right, article and footer from Redis
