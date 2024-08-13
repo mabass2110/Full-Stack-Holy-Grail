@@ -1,7 +1,11 @@
 var express = require("express");
 var app = express();
+const createClient = require("createClient");
 
 //TODO: create a redis client
+const client = await createClient()
+  .on('error', err => console.log('Redis Client Error', err))
+  .connect();
 
 // serve static files from public directory
 app.use(express.static("public"));
