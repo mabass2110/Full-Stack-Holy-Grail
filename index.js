@@ -1,35 +1,50 @@
 var express = require("express");
 var app = express();
-const createClient = require("createClient");
-
+const redis = require("redis");
 //TODO: create a redis client
-const client = await createClient()
-  .on('error', err => console.log('Redis Client Error', err))
-  .connect();
+const client = redis.createClient();
+
 
 // serve static files from public directory
 app.use(express.static("public"));
 
 // TODO: initialize values for: header, left, right, article and footer using the redis client
-await client.set('key', 'value',{
-  header: 0,
-  left: 0,
-  article: 0,
-  article: 0,
-  right: 0,
-  footer: 0
-})
+ client.mset('header',0, 'left',0, 'article',0, 'right',0, 'footer',0)
+
 // Get values for holy grail layout
-function data() {
+ function data() {
   // TODO: uses Promise to get the values for header, left, right, article and footer from Redis
+  return new Promise((resolve,reject) => {
+    const keys = ['header', 'left', 'right', 'article', 'footer'];
+
+    client.mget(keys, (err, value) => {
+      const data = {
+        'header':  Number(value[0]),
+        'left':    Number(value[1]),
+        'article': Number(value[2]),
+        'right':   Number(value[3]),
+        'footer':  Number(value[4])
+      }
+      if (err) {
+        reject("Something went wrong during data fetching")
+      }
+      else{
+        resolve(data)
+      }
+    })
+
+  })
+
 }
 
 // plus
-app.get("/update/:key/:value", function (req, res) {
+app.post("/update/:key/:value", function (req, res) {
   const key = req.params.key;
   let value = Number(req.params.value);
 
   //TODO: use the redis client to update the value associated with the given key
+  client.mset(key, value)
+
 });
 
 // get key data
